@@ -20,17 +20,16 @@ func NewTicketService(logger *log.Logger) (*TicketService, error) {
 	// Get configuration from environment variables
 	sayoriBaseURL := getEnvOrDefault("SAYORI_BASE_URL", "http://localhost:8080")
 	jiraBaseURL := getEnvOrDefault("JIRA_BASE_URL", "https://jira.example.com")
-	jiraUsername := os.Getenv("JIRA_USERNAME")
-	jiraAPIToken := os.Getenv("JIRA_API_TOKEN")
+	jiraToken := os.Getenv("JIRA_TOKEN")
 
 	// Validate required environment variables
-	if jiraUsername == "" || jiraAPIToken == "" {
-		return nil, fmt.Errorf("JIRA_USERNAME and JIRA_API_TOKEN environment variables are required")
+	if jiraToken == "" {
+		return nil, fmt.Errorf("JIRA_TOKEN environment variable is required")
 	}
 
 	// Create clients
 	sayoriClient := clients.NewSayoriClient(sayoriBaseURL, logger)
-	jiraClient := clients.NewJiraClient(jiraBaseURL, jiraUsername, jiraAPIToken, logger)
+	jiraClient := clients.NewJiraClient(jiraBaseURL, jiraToken, logger)
 
 	return &TicketService{
 		sayoriClient: sayoriClient,
@@ -85,6 +84,12 @@ func (s *TicketService) GetCommentsByUser() (map[string]map[string]string, error
 		ticketLastComments := make(map[string]string)
 
 		for _, ticket := range tickets {
+			// Only process tickets where the link starts with "https://jira."
+			if len(ticket.Link) < 13 || ticket.Link[:13] != "https://jira." {
+				s.logger.Printf("Skipping ticket %s as link does not start with 'https://jira.'", ticket.TicketID)
+				continue
+			}
+
 			jiraTicketID := ticket.TicketID
 			s.logger.Printf("Fetching ticket %s from Jira for user %s", jiraTicketID, displayName)
 

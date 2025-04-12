@@ -31,7 +31,7 @@ func NewSayoriClient(baseURL string, logger *log.Logger) *SayoriClient {
 
 // GetTickets retrieves all tickets from the Sayori API
 func (c *SayoriClient) GetTickets() (models.SayoriResponses, error) {
-	url := fmt.Sprintf("%s/tickets", c.baseURL)
+	url := fmt.Sprintf("%s/api/v1/tickets/APIGEE", c.baseURL)
 
 	c.logger.Printf("Fetching tickets from Sayori API: %s", url)
 
@@ -53,12 +53,13 @@ func (c *SayoriClient) GetTickets() (models.SayoriResponses, error) {
 		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
-	var tickets models.SayoriResponses
+	var tickets models.SayoriWrapperResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tickets); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return tickets, nil
+	var arrayOfTickets models.SayoriResponses = tickets.Data
+	return arrayOfTickets, nil
 }
 
 // FindTicket searches for a specific ticket by ID in the list of tickets

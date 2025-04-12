@@ -14,17 +14,15 @@ import (
 // JiraClient is a client for the Jira API
 type JiraClient struct {
 	baseURL    string
-	username   string
 	apiToken   string
 	httpClient *http.Client
 	logger     *log.Logger
 }
 
 // NewJiraClient creates a new Jira API client
-func NewJiraClient(baseURL, username, apiToken string, logger *log.Logger) *JiraClient {
+func NewJiraClient(baseURL, apiToken string, logger *log.Logger) *JiraClient {
 	return &JiraClient{
 		baseURL:  baseURL,
-		username: username,
 		apiToken: apiToken,
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
@@ -45,7 +43,7 @@ func (c *JiraClient) GetTicket(ticketID string) (*models.JiraTicket, error) {
 	}
 
 	req.Header.Set("Authorization", "Basic "+c.apiToken)
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -59,7 +57,14 @@ func (c *JiraClient) GetTicket(ticketID string) (*models.JiraTicket, error) {
 	}
 
 	var ticket models.JiraTicket
-	if err := json.NewDecoder(resp.Body).Decode(&ticket); err != nil {
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	fmt.Println("Body response: ", string(body))
+
+	if err := json.Unmarshal(body, &ticket); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -72,7 +77,7 @@ func (c *JiraClient) GetCommentsByUser(ticket *models.JiraTicket, displayName st
 
 	var userComments []string
 
-	for _, comment := range ticket.Comments {
+	for _, comment := range ticket.Fields.Comments {
 		if comment.Author.DisplayName == displayName {
 			userComments = append(userComments, comment.Body)
 		}
@@ -89,9 +94,9 @@ func (c *JiraClient) GetLastCommentByUser(ticket *models.JiraTicket, displayName
 
 	var lastComment *models.JiraComment
 
-	for i := range ticket.Comments {
-		comment := &ticket.Comments[i]
-		if comment.Author.DisplayName == displayName {
+	for i := range ticket.Fields.Comments {
+		comment := &ticket.Fields.Comments[i]
+		if comment.Author.Name == displayName {
 			if lastComment == nil || comment.Created.After(lastComment.Created) {
 				lastComment = comment
 			}
