@@ -35,8 +35,10 @@ The application is configured using environment variables:
 |----------|-------------|---------|
 | `SAYORI_BASE_URL` | Base URL for the Sayori API | `http://localhost:8080` |
 | `JIRA_BASE_URL` | Base URL for the Jira API | `https://jira.example.com` |
-| `JIRA_USERNAME` | Username for Jira API authentication | (required) |
 | `JIRA_API_TOKEN` | API token for Jira API authentication | (required) |
+| `AWS_ACCESS_KEY_ID`       | Your AWS access key ID                           | (required)            |
+| `AWS_SECRET_ACCESS_KEY`   | Your AWS secret access key                       | (required)            |
+| `AWS_REGION`              | The AWS region where your DynamoDB table is located | `us-east-1`         |
 
 ## Usage
 
