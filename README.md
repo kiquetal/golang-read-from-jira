@@ -39,7 +39,7 @@ The application is configured using environment variables:
 | `AWS_ACCESS_KEY_ID`       | Your AWS access key ID                           | (required)            |
 | `AWS_SECRET_ACCESS_KEY`   | Your AWS secret access key                       | (required)            |
 | `AWS_REGION`              | The AWS region where your DynamoDB table is located | `us-east-1`         |
-
+| `IS_LOCAL`              | Whether to use local DynamoDB or not            | `false`              |
 ## Usage
 
 ### Building the Application
