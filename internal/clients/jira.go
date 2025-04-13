@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,6 +26,9 @@ func NewJiraClient(baseURL, apiToken string, logger *log.Logger) *JiraClient {
 		baseURL:  baseURL,
 		apiToken: apiToken,
 		httpClient: &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
 			Timeout: 10 * time.Second,
 		},
 		logger: logger,
@@ -62,8 +66,6 @@ func (c *JiraClient) GetTicket(ticketID string) (*models.JiraTicket, error) {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	fmt.Println("Body response: ", string(body))
-
 	if err := json.Unmarshal(body, &ticket); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
@@ -77,7 +79,7 @@ func (c *JiraClient) GetCommentsByUser(ticket *models.JiraTicket, displayName st
 
 	var userComments []string
 
-	for _, comment := range ticket.Fields.Comments {
+	for _, comment := range ticket.Fields.Comments.Comments {
 		if comment.Author.DisplayName == displayName {
 			userComments = append(userComments, comment.Body)
 		}
@@ -94,10 +96,10 @@ func (c *JiraClient) GetLastCommentByUser(ticket *models.JiraTicket, displayName
 
 	var lastComment *models.JiraComment
 
-	for i := range ticket.Fields.Comments {
-		comment := &ticket.Fields.Comments[i]
+	for i := range ticket.Fields.Comments.Comments {
+		comment := &ticket.Fields.Comments.Comments[i]
 		if comment.Author.Name == displayName {
-			if lastComment == nil || comment.Created.After(lastComment.Created) {
+			if lastComment == nil || comment.Created.After(lastComment.Created.Time) {
 				lastComment = comment
 			}
 		}

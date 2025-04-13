@@ -47,12 +47,24 @@ func (ct *CustomTime) UnmarshalJSON(b []byte) error {
 	str := string(b)
 	str = str[1 : len(str)-1]
 
-	// Parse the timestamp
-	parsedTime, err := time.Parse("2006-01-02T15:04:05.999999", str)
-	if err != nil {
-		return fmt.Errorf("failed to parse time: %w", err)
+	formats := []string{
+		"2006-01-02T15:04:05.999-0700",  // Handles "+0000" format
+		"2006-01-02T15:04:05.999Z07:00", // Handles "Z07:00" format
+		"2006-01-02T15:04:05.999999",    // Handles format without timezone
 	}
 
-	ct.Time = parsedTime
-	return nil
+	var parsedTime time.Time
+	var err error
+
+	// Try parsing with each format
+	for _, format := range formats {
+		parsedTime, err = time.Parse(format, str)
+		if err == nil {
+			ct.Time = parsedTime
+			return nil
+		}
+	}
+
+	// Return error if all formats fail
+	return fmt.Errorf("failed to parse time: %w", err)
 }
