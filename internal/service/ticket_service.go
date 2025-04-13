@@ -31,6 +31,18 @@ func NewTicketService(logger *log.Logger) (*TicketService, error) {
 	sayoriClient := clients.NewSayoriClient(sayoriBaseURL, logger)
 	jiraClient := clients.NewJiraClient(jiraBaseURL, jiraToken, logger)
 
+	dynamoClient, err := clients.NewDynamoDBClient()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create DynamoDB client: %w", err)
+	}
+
+	// Create the DynamoDB table if it doesn't exist
+	err = dynamoClient.CreateTableLocal("table-rag", "pk", "sk")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create DynamoDB table: %w", err)
+	}
+
 	return &TicketService{
 		sayoriClient: sayoriClient,
 		jiraClient:   jiraClient,

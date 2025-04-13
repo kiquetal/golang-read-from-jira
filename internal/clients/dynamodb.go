@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"os"
 )
 
@@ -29,8 +30,9 @@ func NewDynamoDBClient() (*DynamoDBClient, error) {
 
 	}
 
-	if isLocal == "true" {
+	if isLocal == "True" {
 
+		fmt.Printf("Starting DynamoDB in local mode\n")
 		client := dynamodb.NewFromConfig(cfg,
 			func(options *dynamodb.Options) {
 				options.BaseEndpoint = aws.String("http://localhost:4566")
@@ -45,4 +47,46 @@ func NewDynamoDBClient() (*DynamoDBClient, error) {
 		client: dynamodb.NewFromConfig(cfg),
 	}, nil
 
+}
+
+func (d *DynamoDBClient) CreateTableLocal(tableName, pk, sk string) error {
+	// Create a table in DynamoDB
+	// This is a placeholder and should be replaced with actual table creation code
+
+	fmt.Printf("IS_LOCAL: %s\n", os.Getenv("IS_LOCAL"))
+	if os.Getenv("IS_LOCAL") != "True" {
+		return fmt.Errorf("not in local mode")
+	}
+	_, err := d.client.CreateTable(context.TODO(), &dynamodb.CreateTableInput{
+		TableName: aws.String(tableName),
+		KeySchema: []types.KeySchemaElement{
+			{
+				AttributeName: aws.String(pk),
+				KeyType:       types.KeyTypeHash,
+			},
+			{
+				AttributeName: aws.String(sk),
+				KeyType:       types.KeyTypeRange,
+			},
+		},
+		AttributeDefinitions: []types.AttributeDefinition{
+			{
+				AttributeName: aws.String(pk),
+				AttributeType: types.ScalarAttributeTypeS,
+			},
+			{
+				AttributeName: aws.String(sk),
+				AttributeType: types.ScalarAttributeTypeS,
+			},
+		},
+		ProvisionedThroughput: &types.ProvisionedThroughput{
+			ReadCapacityUnits:  aws.Int64(5),
+			WriteCapacityUnits: aws.Int64(5),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create table: %w", err)
+	}
+	// Return the table name and primary key
+	return nil
 }
