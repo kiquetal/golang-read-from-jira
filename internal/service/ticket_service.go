@@ -95,6 +95,14 @@ func (s *TicketService) GetCommentsByUser() (map[string]map[string]string, map[s
 		userTickets[displayName] = append(userTickets[displayName], ticket)
 	}
 
+	for displayName, tickets := range userTickets {
+
+		s.logger.Printf("User: %s, Tickets: %d", displayName, len(tickets))
+		for _, ticket := range tickets {
+			s.logger.Printf("Ticket ID: %s, Link: %s", ticket.TicketID, ticket.Link)
+		}
+	}
+
 	// Step 3: For each user, get the last comment from all their tickets
 	s.logger.Printf("Getting last comment for each user's tickets")
 	result := make(map[string]map[string]string)

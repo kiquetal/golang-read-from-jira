@@ -95,7 +95,7 @@ func (c *JiraClient) GetLastCommentByUser(ticket *models.JiraTicket, displayName
 	c.logger.Printf("Finding last comment by display name: %s", displayName)
 
 	var lastComment *models.JiraComment
-
+	var summaryTicket = ticket.Fields.Summary
 	for i := range ticket.Fields.Comments.Comments {
 		comment := &ticket.Fields.Comments.Comments[i]
 		if comment.Author.Name == displayName {
@@ -107,7 +107,8 @@ func (c *JiraClient) GetLastCommentByUser(ticket *models.JiraTicket, displayName
 
 	if lastComment == nil {
 		c.logger.Printf("No comments found by user %s", displayName)
-		return "", nil
+		c.logger.Printf("We will return the summary as the last comment")
+		return summaryTicket, nil
 	}
 
 	c.logger.Printf("Found last comment by user %s created at %s", displayName, lastComment.Created)
