@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/kiquetal/golang-read-from-jira/internal/models"
 	"os"
+	"time"
 )
 
 type DynamoDBClient struct {
@@ -89,4 +92,31 @@ func (d *DynamoDBClient) CreateTableLocal(tableName, pk, sk string) error {
 	}
 	// Return the table name and primary key
 	return nil
+}
+
+func (d *DynamoDBClient) PutTicketCommentsInDynammo(userBot, ticket, description string) error {
+
+	var dynamoDbTicket models.DynamoDBTicket = models.DynamoDBTicket{
+		Pk:        userBot,
+		Sk:        ticket,
+		Comments:  description,
+		UpdatedAt: time.Now().Format(time.RFC3339),
+		CreatedAt: time.Now().Format(time.RFC3339),
+	}
+
+	// Convert the ticket to a DynamoDB item
+	item, err := attributevalue.MarshalMap(dynamoDbTicket)
+	if err != nil {
+		return fmt.Errorf("failed to marshal ticket: %w", err)
+	}
+	// Put the item in the DynamoDB table
+	_, err = d.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String("table-rag"),
+		Item:      item,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to put item in DynamoDB: %w", err)
+	}
+	return nil
+
 }

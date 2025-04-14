@@ -72,19 +72,24 @@ func (s *TicketService) GetCommentsByDisplayName(ticketID, displayName string) (
 
 // GetCommentsByUser groups users with their tickets from Sayori,
 // then looks in Jira for the last comment issued by this user in the ticket
-func (s *TicketService) GetCommentsByUser() (map[string]map[string]string, error) {
+func (s *TicketService) GetCommentsByUser() (map[string]map[string]string, map[string]string, error) {
 	// Step 1: Get all tickets from Sayori
 	s.logger.Printf("Fetching all tickets from Sayori")
 	sayoriTickets, err := s.sayoriClient.GetTickets()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tickets from Sayori: %w", err)
+		return nil, nil, fmt.Errorf("failed to get tickets from Sayori: %w", err)
 	}
 
 	// Step 2: Group tickets by user
 	s.logger.Printf("Grouping tickets by user")
 	userTickets := make(map[string][]models.SayoriResponse)
+	mapBotUserDisplayName := make(map[string]string)
 	for _, ticket := range sayoriTickets {
 		displayName := ticket.BotUser.DisplayName
+		bot_user_id := ticket.BotUserID
+		if _, exists := mapBotUserDisplayName[displayName]; !exists {
+			mapBotUserDisplayName[displayName] = bot_user_id
+		}
 		userTickets[displayName] = append(userTickets[displayName], ticket)
 	}
 
@@ -128,7 +133,7 @@ func (s *TicketService) GetCommentsByUser() (map[string]map[string]string, error
 		}
 	}
 
-	return result, nil
+	return result, mapBotUserDisplayName, nil
 }
 
 // getEnvOrDefault gets an environment variable or returns a default value if not set

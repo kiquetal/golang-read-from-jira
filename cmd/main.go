@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// Get comments by user
-	userComments, err := svc.GetCommentsByUser()
+	userComments, mapDisplayName, err := svc.GetCommentsByUser()
 	if err != nil {
 		logger.Fatalf("Failed to get comments: %v", err)
 	}
