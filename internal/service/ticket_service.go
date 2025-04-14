@@ -39,9 +39,9 @@ func NewTicketService(logger *log.Logger) (*TicketService, error) {
 	}
 
 	// Create the DynamoDB table if it doesn't exist
-	err = dynamoClient.CreateTableLocal("table-rag", "pk", "sk")
+	err = dynamoClient.CreateTableLocal("roaster-for-slack-test-users", "pk", "sk")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create DynamoDB table: %w", err)
+		fmt.Printf("failed to create DynamoDB table locally: %w", err)
 	}
 
 	return &TicketService{

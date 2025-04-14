@@ -65,3 +65,6 @@ export JIRA_API_TOKEN=your-api-token
 ./jira-reader
 ```
 
+# Run the application with env variables
+
+SAYORI_BASE_URL=https://sayori.com IS_LOCAL=True JIRA_BASE_URL=https://jira.com JIRA_TOKEN=FFFFFFAAAAA JIRA_USERNAME=nobody ./jira-reader

@@ -124,7 +124,7 @@ func (d *DynamoDBClient) PutTicketCommentsInDynammo(userBot, ticket, description
 	}
 	// Put the item in the DynamoDB table
 	_, err = d.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String("table-rag"),
+		TableName: aws.String("roaster-for-slack-test-users"),
 		Item:      item,
 	})
 	if err != nil {
