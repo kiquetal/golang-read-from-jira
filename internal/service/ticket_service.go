@@ -12,6 +12,7 @@ import (
 type TicketService struct {
 	sayoriClient *clients.SayoriClient
 	jiraClient   *clients.JiraClient
+	dynamoClient *clients.DynamoDBClient
 	logger       *log.Logger
 }
 
@@ -47,6 +48,7 @@ func NewTicketService(logger *log.Logger) (*TicketService, error) {
 		sayoriClient: sayoriClient,
 		jiraClient:   jiraClient,
 		logger:       logger,
+		dynamoClient: dynamoClient,
 	}, nil
 }
 
@@ -143,4 +145,14 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+func (s *TicketService) PutItemInDynamo(botUserId, ticketId, lastComment string) error {
+
+	ticketIdd := fmt.Sprintf("#TICKET#%s", ticketId)
+	err := s.dynamoClient.PutTicketCommentsInDynammo(botUserId, ticketIdd, lastComment)
+	if err != nil {
+		return fmt.Errorf("failed to put item in DynamoDB: %w", err)
+	}
+	return nil
 }

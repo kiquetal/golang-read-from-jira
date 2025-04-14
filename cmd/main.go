@@ -38,6 +38,12 @@ func main() {
 		for ticketID, lastComment := range ticketComments {
 			fmt.Printf("\nTicket: %s\n", ticketID)
 			fmt.Printf("Last comment: %s\n", lastComment)
+			err := svc.PutItemInDynamo(mapDisplayName[user], ticketID, lastComment)
+			if err != nil {
+				fmt.Printf("Failed to put item in DynamoDB: %v\n", err)
+			} else {
+				fmt.Printf("Item successfully put in DynamoDB\n")
+			}
 		}
 		fmt.Println(strings.Repeat("=", 60))
 	}

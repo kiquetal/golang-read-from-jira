@@ -58,9 +58,22 @@ func (d *DynamoDBClient) CreateTableLocal(tableName, pk, sk string) error {
 
 	fmt.Printf("IS_LOCAL: %s\n", os.Getenv("IS_LOCAL"))
 	if os.Getenv("IS_LOCAL") != "True" {
+
 		return fmt.Errorf("not in local mode")
 	}
-	_, err := d.client.CreateTable(context.TODO(), &dynamodb.CreateTableInput{
+
+	// Check if the table already exists
+
+	describeTableInput := &dynamodb.DescribeTableInput{
+		TableName: aws.String(tableName),
+	}
+	_, err := d.client.DescribeTable(context.TODO(), describeTableInput)
+	if err == nil {
+		fmt.Printf("Table %s already exists\n", tableName)
+		return nil
+	}
+
+	_, err = d.client.CreateTable(context.TODO(), &dynamodb.CreateTableInput{
 		TableName: aws.String(tableName),
 		KeySchema: []types.KeySchemaElement{
 			{
