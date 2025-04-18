@@ -10,7 +10,7 @@ A Go application that fetches ticket information from Jira and extracts comments
 - [Usage](#usage)
   - [Building the Application](#building-the-application)
   - [Running the Application](#running-the-application)
-    - [Mode 1: Fetch all tickets from Sayori and group by user](#mode-1-fetch-all-tickets-from-sayori-and-group-by-user)
+    - [Mode 1: Fetch all tickets from Sayori](#mode-1-fetch-all-tickets-from-sayori-and-group-by-user-default)
 
 
 
@@ -82,3 +82,4 @@ export JIRA_API_TOKEN=your-api-token
 # Run the application with env variables
 
 SAYORI_BASE_URL=https://sayori.com IS_LOCAL=True JIRA_BASE_URL=https://jira.com JIRA_TOKEN=FFFFFFAAAAA JIRA_USERNAME=nobody ./jira-reader
+`
