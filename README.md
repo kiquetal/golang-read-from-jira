@@ -2,6 +2,18 @@
 
 A Go application that fetches ticket information from Jira and extracts comments by specific users. It can either fetch all tickets from the Sayori API and group them by user, or directly fetch a specific Jira ticket by ID.
 
+## Table of Contents
+
+- [Project Structure](#project-structure)
+- [Requirements](#requirements)
+- [Configuration](#configuration)
+- [Usage](#usage)
+  - [Building the Application](#building-the-application)
+  - [Running the Application](#running-the-application)
+    - [Mode 1: Fetch all tickets from Sayori and group by user](#mode-1-fetch-all-tickets-from-sayori-and-group-by-user)
+
+
+
 ## Project Structure
 
 ```
@@ -11,9 +23,11 @@ A Go application that fetches ticket information from Jira and extracts comments
 ├── internal/
 │   ├── clients/
 │   │   ├── jira.go       # Jira API client
+│   │   ├── dynamodb.go   # DynamoDB client
 │   │   └── sayori.go     # Sayori API client
 │   ├── models/
 │   │   ├── jira.go       # Jira data models
+│   │   ├── dynamodb.go   # DynamoDB data models
 │   │   └── sayori.go     # Sayori data models
 │   └── service/
 │       └── ticket_service.go # Business logic
